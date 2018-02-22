@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>socket</title>
+	<style herf="bootstrap.css"></style>
+	<style type="text/css">
+		html, body{
+			height: 100%;
+		}
+		.list{
+			float: left;
+			width: 25%;	
+			height: 100%;		
+		}
+		.pubChat{
+			float: left;
+			width: 50%;
+			height: 100%;
+		}
+		.private{
+			position: absolute;
+			display: none;
+			left: -150px;
+			top: 30px;
+			width: 300px;
+			height: 500px;
+			margin-left: 50%;
+			background: #fff;
+		}
+		.border{
+			border: 1px solid #777;
+			padding: 10px;
+		}
+	</style>
+</head>
+<body>
+	<div class="login" >
+		<input type="text" name="name" id='name'>
+		<input type="button" id="login" value="登录">
+	</div>
+	<div>
+		<ul class='list border' id="userList">11</ul>
+		<div class='pubChat border' id="pubChat">
+			<h1>public</h1>
+			<div class="chat-box" id="public-chat"></div>
+			<input type="text" name="message" id='message'>
+			<input type="button" id="send" value="发送">
+		</div>
+	</div>
+	<div class='private border' id="private-chat-box">
+		<h4 id='private-title'>正在与</h4>
+		<div class="chat-box" id="private-chat"></div>
+		<input type="text" name="message" id='privatemessage'>
+		<input type="button" id="privatesend" value="发送">
+	</div>
+	<script src="socket.io.js"></script>
+	<script src="jquery.min.js"></script>
+	<script src="chat.js"></script>
+</body>
+</html>
