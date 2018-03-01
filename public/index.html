@@ -39,7 +39,8 @@
 		<input type="button" id="login" value="登录">
 	</div>
 	<div>
-		<ul class='list border' id="userList">11</ul>
+		<button id="invite">invited friends</button>
+		<ul class='list border' id="userList"></ul>
 		<div class='pubChat border' id="pubChat">
 			<h1>public</h1>
 			<div class="chat-box" id="public-chat"></div>
@@ -52,6 +53,9 @@
 		<div class="chat-box" id="private-chat"></div>
 		<input type="text" name="message" id='privatemessage'>
 		<input type="button" id="privatesend" value="发送">
+	</div>
+	<div id="namespace">
+		<button class="primary-btn" id='join'>join</button>
 	</div>
 	<script src="socket.io.js"></script>
 	<script src="jquery.min.js"></script>

@@ -4,7 +4,9 @@ var CUSTOMER_INFO={
 	id: '',
 	friends: [],
 	privateFriend: '',
-	privateChatContent: {}
+	privateChatContent: {},
+	creatRoom: '',
+	invitedFriend:[]
 }
 
 //建立socket 连接
@@ -35,19 +37,20 @@ var publicChatBox = document.querySelector('#public-chat'),
 			name: CUSTOMER_INFO.name,
 			msg : publicMsg.value
 		})
-		publicChatBox.innerHTML += '<p><strong>'+CUSTOMER_INFO.name+':</strong>'+ publicMsg.value+'</p>';
+		publicChatBox.innerHTML += '<p><strong>'+CUSTOMER_INFO.name+': </strong>'+ publicMsg.value+'</p>';
 		publicMsg.value = ''
 	})
 
 	//所有人上线提醒
 	socket.on('someLogin',(name)=>{
 		publicChatBox.innerHTML += '<p>'+name+'登录了</p>';
-		userList.innerHTML += '<li ondblclick="getFriendName(event)">'+ name+ '</li>';
+		userList.innerHTML += '<li ><input type="checkbox" onclick="selectRoomFriend(event)" value="'
+								+name+'"><span ondblclick="getFriendName(event)">'+ name+ '</span></li>';
 		CUSTOMER_INFO.friends.unshift(name)
 	});
 	//收到消息
 	socket.on('msg',(data)=>{
-		publicChatBox.innerHTML += '<p><strong>'+data.name+':</strong>'+ data.msg+'</p>';
+		publicChatBox.innerHTML += '<p><strong>'+data.name+': </strong>'+ data.msg+'</p>';
 	})
 
 //私聊聊天
@@ -62,7 +65,7 @@ sendPrivate.on('click',()=>{
 						reciever: CUSTOMER_INFO.privateFriend,
 						msg:privateMsg.val()})
 
-	$('#private-chat').append('<p><strong>'+CUSTOMER_INFO.name+':</strong>'+ privateMsg.val()+'</p>');
+	$('#private-chat').append('<p><strong>'+CUSTOMER_INFO.name+': </strong>'+ privateMsg.val()+'</p>');
 	privateMsg.val('')
 });
 socket.on('privateMsg',(privateMsg)=>{
@@ -72,7 +75,7 @@ socket.on('privateMsg',(privateMsg)=>{
 	changePrivateTitle()
 	setPrivateChatContent()
 
-	let str = '<p><strong>'+privateMsg.sender+':</strong>'+privateMsg.msg+'</p>';
+	let str = '<p><strong>'+privateMsg.sender+': </strong>'+privateMsg.msg+'</p>';
 	$('#private-chat').append(str)
 });
 socket.on('DisconnectReq', function() {	socket.disconnect(); })
@@ -81,7 +84,8 @@ socket.on('DisconnectReq', function() {	socket.disconnect(); })
 socket.emit('loaded','loaded')
 socket.on('loaded',(list)=>{
 	$.each(list, function(index, name){
-		userList.innerHTML += '<li ondblclick="getFriendName(event)">'+ name+ '</li>';
+		userList.innerHTML += '<li ><input type="checkbox" onclick="selectRoomFriend(event)" value="'
+								+name+'"><span ondblclick="getFriendName(event)">'+ name+ '</span></li>';
 	})
 })
 
@@ -92,7 +96,6 @@ function getFriendName(event){
 	changePrivateTitle()
 	setPrivateChatContent()
 }
-
 function openPrivateBox(){
 	if( CUSTOMER_INFO.privateFriend !== CUSTOMER_INFO.name ){
 		privateChatBox.fadeIn()
@@ -113,3 +116,50 @@ function getPrivateChatContent(){
 function setPrivateChatContent(){
 	$('#private-chat').html( CUSTOMER_INFO.privateChatContent[CUSTOMER_INFO.privateFriend] );
 }
+
+function selectRoomFriend(event){
+	var name = event.target.value
+	
+	var index = CUSTOMER_INFO.invitedFriend.indexOf(name);
+    if (index !== -1) {
+    	CUSTOMER_INFO.invitedFriend.splice(index, 1);
+    }else{
+    	CUSTOMER_INFO.invitedFriend.push(name)
+    }
+}
+
+$('#invite').on('click',function(){
+	socket.emit("createRoom",{
+		room : 'first',
+		friends: CUSTOMER_INFO.invitedFriend,
+		me: CUSTOMER_INFO.name
+	})
+})
+socket.on('invite',function(room){
+	console.log(room);
+	socket.emit("join",{room: room,
+						name: CUSTOMER_INFO.name})
+})
+socket.on('roomMsg',(data)=>{
+	publicChatBox.innerHTML += '<p><strong>'+data.name+': </strong>'+ data.msg+'</p>';
+})
+socket.on('sys',function(data){
+	console.log(data);
+	socket.emit('chattingRoom',
+		{room : 'first',
+		 name: CUSTOMER_INFO.name,
+		 msg: 'hi'}
+	)
+})
+
+
+var socket1 = null
+$("#join").on('click',function(){
+	if(socket1) delete socket1;
+	socket1 = io('/owlyme');
+	socket1.emit('nsp',CUSTOMER_INFO.name)
+	socket1.on('nsp',function(data){
+		$('#namespace').append( data )
+	})	
+})
+
