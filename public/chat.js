@@ -5,6 +5,7 @@ var CUSTOMER_INFO={
 	friends: [],
 	privateFriend: '',
 	privateChatContent: {},
+	invitedFriend: [],
 	totalClients: 0
 }
 
@@ -169,3 +170,27 @@ function setPrivateChatContent(){
 }
 
           
+//创建加入房间
+$('#invite').on('click',function(){
+	socket.emit("createRoom",{
+		room : 'first',
+		friends: CUSTOMER_INFO.invitedFriend,
+		me: CUSTOMER_INFO.name
+	})
+})
+socket.on('invite',function(room){
+	console.log(room);
+	socket.emit("join",{room: room,
+						name: CUSTOMER_INFO.name})
+})
+socket.on('roomMsg',(data)=>{
+	publicChatBox.innerHTML += '<p><strong>'+data.name+': </strong>'+ data.msg+'</p>';
+})
+socket.on('sys',function(data){
+	console.log(data);
+	socket.emit('chattingRoom',
+		{room : 'first',
+		 name: CUSTOMER_INFO.name,
+		 msg: 'hi'}
+	)
+})

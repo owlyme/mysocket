@@ -73,6 +73,30 @@ io.on('connection', (socket)=>{
 		}		
 	})
 
+	//create chatting room
+	socket.on('createRoom', (creatRoom)=>{
+		console.log(creatRoom)
+		if(!rooms[creatRoom.room]){
+			rooms[creatRoom.room]= creatRoom.room
+		}
+		socket.join(creatRoom.room)
+		//inviting friends
+		creatRoom.friends.forEach((item, index)=>{
+			if(typeof users[item] === "object"){
+				users[item].emit('invite', creatRoom.room)
+			}
+		})
+	})
+	//join room
+	socket.on('join',(joinRoom)=>{
+		socket.join(joinRoom.room)
+		io.to(joinRoom.room).emit('sys', joinRoom.name + '加入了房间');
+	})
+	//chatting in room
+	socket.on('chattingRoom',(msg)=>{
+		socket.broadcast.to(msg.room).emit('roomMsg', msg);
+	})
+
 	//disconnect 
 	socket.on('disconnect',()=>{
 		if (typeof client === "object"){

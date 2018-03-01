@@ -39,21 +39,36 @@
 		</div>
 		
 		<p class="text-center">Welcome to owlyme chatting room!</p>
-
-		<div class='private border' id="private-chat-box">
-			<div class="close">
-				<button type="button" class="btn" aria-label="Left Align"><span class="glyphicons glyphicons-remove-circle">X</span></button>
-			</div>	
-			<h5 class="chat-header" id='private-title'>正在...</h5>
-			<div class="chat-box" id="private-chat"></div>
-			<div class="input-group input-group-lg login">		  
-			  <input type="text" class="form-control" placeholder="Username" aria-describedby="sizing-addon1" name="message" id='privatemessage' />
-			  <span class="input-group-btn">
-		        <button class="btn btn-primary" type="button" id="privatesend">发送</button>
-		      </span>
-			</div>
+	</div>
+	<!-- private -->
+	<div class='private border' id="private-chat-box">
+		<div class="close">
+			<button type="button" class="btn" aria-label="Left Align"><span class="glyphicons glyphicons-remove-circle">X</span></button>
+		</div>	
+		<h5 class="chat-header" id='private-title'>正在...</h5>
+		<div class="chat-box" id="private-chat"></div>
+		<div class="input-group input-group-lg login">		  
+		  <input type="text" class="form-control" placeholder="Username" aria-describedby="sizing-addon1" name="message" id='privatemessage' />
+		  <span class="input-group-btn">
+	        <button class="btn btn-primary" type="button" id="privatesend">发送</button>
+	      </span>
 		</div>
-	</div>	
+	</div>
+
+	<!-- chatting room -->
+	<div class='room border' id="room-chat-box">
+		<div class="close">
+			<button type="button" class="btn" aria-label="Left Align"><span class="glyphicons glyphicons-remove-circle">X</span></button>
+		</div>	
+		<h5 class="chat-header" id='room-title'>正在...</h5>
+		<div class="chat-box" id="room-chat"></div>
+		<div class="input-group input-group-lg login">		  
+		  <input type="text" class="form-control" placeholder="Username" aria-describedby="sizing-addon1" name="message" id='roommessage' />
+		  <span class="input-group-btn">
+	        <button class="btn btn-primary" type="button" id="roomsend">发送</button>
+	      </span>
+		</div>
+	</div>
 	<!-- scripts -->
 	<script src="socket.io.js"></script>
 	<script src="jquery.min.js"></script>
