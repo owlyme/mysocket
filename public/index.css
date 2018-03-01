@@ -9,14 +9,15 @@ html, body{
 	padding: 10px 5px;
 }
 .chat-box{
-	height: 600px;
+	height: 450px;
 	overflow-y: scroll;
 	border-top: 0.98px solid rgb(204, 204, 204);
 }
 .close{
 	margin-top: 5px;
 }
-.private{
+.private,
+.room{
 	position: absolute;
 	display: none;
 	left: 50%;
@@ -29,7 +30,8 @@ html, body{
 	z-index: 9;
 	box-shadow: 0 0 100px 1000px #000000a6;
 }
-.private .chat-box{
+.private .chat-box,
+.room .chat-box{
 	height: 300px;
 }
 .border{

@@ -10,7 +10,8 @@ app.use(express.static('public'))
 
 const io = socket(server)
 const users = {},
-	  list =[];
+	  list =[],
+	  rooms = [];
 
 const totalClients = ()=>{
 	io.clients((error, clients) => {
@@ -75,7 +76,7 @@ io.on('connection', (socket)=>{
 
 	//create chatting room
 	socket.on('createRoom', (creatRoom)=>{
-		console.log(creatRoom)
+		
 		if(!rooms[creatRoom.room]){
 			rooms[creatRoom.room]= creatRoom.room
 		}
@@ -94,6 +95,7 @@ io.on('connection', (socket)=>{
 	})
 	//chatting in room
 	socket.on('chattingRoom',(msg)=>{
+		console.log(msg)
 		socket.broadcast.to(msg.room).emit('roomMsg', msg);
 	})
 

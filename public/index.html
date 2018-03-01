@@ -19,6 +19,7 @@
 		  <!-- userlist -->
 		  <div class="col-md-4">
 		  	<h4>在线人数：<span id="total-clients">0</span>人</h4>
+		  	<button class="btn btn-primary" type="button" id="invite" >邀请</button>
 		  	<ul class='list-group' id="userList"></ul>
 		  </div>
 		  <!-- public chat block -->
@@ -28,7 +29,7 @@
 					<h5 class="chat-header">public</h5>			
 					<div class="chat-box" id="public-chat"></div>
 					<div class="input-group input-group-lg login">		  
-					  <input type="text" class="form-control" placeholder="Username" aria-describedby="sizing-addon1" name="message" id='message'>
+					  <input type="text" class="form-control" placeholder="Message..." aria-describedby="sizing-addon1" name="message" id='message'>
 					  <span class="input-group-btn">
 				        <button class="btn btn-primary" type="button" id="send" >发送</button>
 				      </span>
@@ -48,7 +49,7 @@
 		<h5 class="chat-header" id='private-title'>正在...</h5>
 		<div class="chat-box" id="private-chat"></div>
 		<div class="input-group input-group-lg login">		  
-		  <input type="text" class="form-control" placeholder="Username" aria-describedby="sizing-addon1" name="message" id='privatemessage' />
+		  <input type="text" class="form-control" placeholder="Message..." aria-describedby="sizing-addon1" name="message" id='privatemessage' />
 		  <span class="input-group-btn">
 	        <button class="btn btn-primary" type="button" id="privatesend">发送</button>
 	      </span>
@@ -63,7 +64,7 @@
 		<h5 class="chat-header" id='room-title'>正在...</h5>
 		<div class="chat-box" id="room-chat"></div>
 		<div class="input-group input-group-lg login">		  
-		  <input type="text" class="form-control" placeholder="Username" aria-describedby="sizing-addon1" name="message" id='roommessage' />
+		  <input type="text" class="form-control" placeholder="Message..." aria-describedby="sizing-addon1" name="message" id='roommessage' />
 		  <span class="input-group-btn">
 	        <button class="btn btn-primary" type="button" id="roomsend">发送</button>
 	      </span>

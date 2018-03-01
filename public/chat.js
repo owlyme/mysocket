@@ -5,9 +5,11 @@ var CUSTOMER_INFO={
 	friends: [],
 	privateFriend: '',
 	privateChatContent: {},
+	creatRoom: '',
+	joinedRoom: '',
 	invitedFriend: [],
 	totalClients: 0
-}
+};
 
 //建立socket 连接
 var socket = io();
@@ -18,7 +20,17 @@ socket.on('total',function(data){
 	totalClients.text(data)
 	CUSTOMER_INFO.totalClients = data
 })
+//心跳触发
+	socket.on('DisconnectReq', function() {	socket.disconnect(); })
 
+//连接上去之后加载相关信息
+	socket.emit('loaded','loaded')
+	socket.on('loaded',(list)=>{
+		$.each(list, function(index, name){
+			userList.append( '<li ><input type="checkbox" onclick="selectRoomFriend(event)" value="'
+								+name+'"><span ondblclick="getFriendName(event)">'+ name+ '</span></li>');
+		})
+	})
 //登陆
 var _name = $('#name'),
 	loginBtn = $('#login');
@@ -30,68 +42,70 @@ enterKeyEvent(_name,function(){
 	socket.emit('login',_name.val());
 	CUSTOMER_INFO.name = _name.val() })
 
-//公共聊天室
+//公共聊天室-------------------------------------------------------------------
 var publicChatBox = $('#public-chat'),
 	publicMsg = $('#message'),
 	sendPublic = $('#send'),
-	userList = document.querySelector('#userList');
+	userList = $('#userList');
 
-	//发送公聊消息
+	//发送公聊消息的方法
 	var publicChatting = function (){
-		socket.emit('msg', {
-			name: CUSTOMER_INFO.name,
-			msg : publicMsg.val()
-		})
-		publicChatBox.append('<p><strong>'+CUSTOMER_INFO.name+':</strong>'+ publicMsg.val()+'</p>');
-		publicChatBox[0].scrollTop = publicChatBox[0].scrollHeight;
-		publicMsg.val('')
-	}
-	sendPublic.on('click',()=>{	publicChatting() })
-	enterKeyEvent(publicMsg,function(){ publicChatting() })
-
-	//所有人上线提醒
-	socket.on('someLogin',(name)=>{
-		publicChatBox.append('<p>'+name+'登录了</p>');
-		userList.innerHTML += '<li ondblclick="getFriendName(event)">'+ name+ '</li>';
-		CUSTOMER_INFO.friends.unshift(name)
-	});
-	//收到消息
+			socket.emit('msg', {
+				name: CUSTOMER_INFO.name,
+				msg : publicMsg.val()
+			})
+			publicChatBox.append('<p><strong>'+CUSTOMER_INFO.name+':</strong>'+ publicMsg.val()+'</p>');
+			publicChatBox[0].scrollTop = publicChatBox[0].scrollHeight;
+			publicMsg.val('')
+		}
+	//发送公聊消息
+	sendPublic.on('click',publicChatting)
+	enterKeyEvent(publicMsg, publicChatting)
+	//收到公聊消息
 	socket.on('msg',(data)=>{
 		publicChatBox.append('<p><strong>'+data.name+':</strong>'+ data.msg+'</p>');
 		publicChatBox[0].scrollTop = publicChatBox[0].scrollHeight;
 	})
+	//所有人上线提醒
+	socket.on('someLogin',(name)=>{
+		publicChatBox.append('<p>'+name+'登录了</p>');
+		userList.append( '<li ><input type="checkbox" onclick="selectRoomFriend(event)" value="'
+								+name+'"><span ondblclick="getFriendName(event)">'+ name+ '</span></li>');
+		CUSTOMER_INFO.friends.unshift(name)
+	});
+	
 
-//私聊聊天
+//私聊聊天-------------------------------------------------------------------
 var privateChatBox = $('#private-chat-box'),
 	closePrivateChatBox = $('#private-chat-box .close'),
 	privateChat = $('#private-chat'),
 	privateMsg = $('#privatemessage'),
 	sendPrivate = $('#privatesend'),
 	privateTitle = $('#private-title');
-//发送私聊消息
-var privateChatting = function(){
-		socket.emit('privateMsg',{
-							sender: CUSTOMER_INFO.name,
-							reciever: CUSTOMER_INFO.privateFriend,
-							msg:privateMsg.val()})
+	//发送私聊消息的方法
+	var privateChatting = function(){
+			socket.emit('privateMsg',{
+								sender: CUSTOMER_INFO.name,
+								reciever: CUSTOMER_INFO.privateFriend,
+								msg:privateMsg.val()})
 
-		$('#private-chat').append('<p><strong>'+CUSTOMER_INFO.name+':</strong>'+ privateMsg.val()+'</p>');
-		privateMsg.val('')
-	}
+			$('#private-chat').append('<p><strong>'+CUSTOMER_INFO.name+':</strong>'+ privateMsg.val()+'</p>');
+			privateMsg.val('')
+		}
+	//发送私聊消息
 	sendPrivate.on('click',()=>{privateChatting()});
 	enterKeyEvent(privateMsg,function(){ privateChatting() })
-
+	//收到私聊消息
 	socket.on('privateMsg',(privateMsg)=>{
 		getPrivateChatContent()
 		CUSTOMER_INFO.privateFriend = privateMsg.sender
 		privateChatBox.fadeIn()
 		changePrivateTitle()
 		setPrivateChatContent()
-
 		let str = '<p><strong>'+privateMsg.sender+':</strong>'+privateMsg.msg+'</p>';
 		$('#private-chat').append(str)
 	});
-
+	//关闭私聊聊天窗
 	closePrivateChatBox.on('click',function(){
 		privateChatBox.fadeOut().removeAttr('style')
 	})
@@ -119,16 +133,7 @@ var privateChatting = function(){
 	        $(this).unbind("mousemove");
 	    });
 	})();
-//心跳触发
-	socket.on('DisconnectReq', function() {	socket.disconnect(); })
 
-//连接上去之后加载相关信息
-	socket.emit('loaded','loaded')
-	socket.on('loaded',(list)=>{
-		$.each(list, function(index, name){
-			userList.innerHTML += '<li ondblclick="getFriendName(event)">'+ name+ '</li>';
-		})
-	})
 //enter键事件
 function enterKeyEvent(ele,fn){
 	ele.on('keyup', (event)=>{
@@ -157,7 +162,6 @@ function openPrivateBox(){
 		}
 	}
 }
-
 function changePrivateTitle(){
 	privateTitle.text('与好友'+ CUSTOMER_INFO.privateFriend+ '聊天中...');	
 }
@@ -170,27 +174,70 @@ function setPrivateChatContent(){
 }
 
           
-//创建加入房间
+//创建加入房间-------------------------------------------------------------------
+function selectRoomFriend(event){
+	var name = event.target.value	
+	var index = CUSTOMER_INFO.invitedFriend.indexOf(name);
+    if (index !== -1) {
+    	CUSTOMER_INFO.invitedFriend.splice(index, 1);
+    }else{
+    	CUSTOMER_INFO.invitedFriend.push(name)
+    }
+}
+var room = $('#room-chat-box'),
+	closeRoomChatBox = $('#room-chat-box .close'),
+	roomChat = $('#room-chat'),
+	roomMsg = $('#roommessage'),
+	sendroom = $('#roomsend'),
+	roomTitle = $('#room-title');
+	//发送加入放假消息的方法
+	var roomChatting = function(){
+			socket.emit('chattingRoom',{room : CUSTOMER_INFO.joinedRoom,
+											 name: CUSTOMER_INFO.name,
+											 msg: roomMsg.val()})
+
+			roomChat.append('<p><strong>'+CUSTOMER_INFO.name+':</strong>'+ roomMsg.val()+'</p>');
+			roomMsg.val('')
+		}
+	//发送房间消息
+	sendroom.on('click',()=>{roomChatting()});
+	enterKeyEvent(roomMsg,function(){ roomChatting() })
+	//收到房间消息
+	socket.on('roomMsg',(data)=>{
+		roomChat.append('<p><strong>'+data.name+': </strong>'+ data.msg+'</p>');
+	})
+	//关闭房间
+	closeRoomChatBox.on('click',function(){
+		room.fadeOut()
+	})
+//邀请朋友进入房价
 $('#invite').on('click',function(){
 	socket.emit("createRoom",{
-		room : 'first',
+		room : CUSTOMER_INFO.name,
 		friends: CUSTOMER_INFO.invitedFriend,
 		me: CUSTOMER_INFO.name
-	})
-})
-socket.on('invite',function(room){
-	console.log(room);
-	socket.emit("join",{room: room,
+	});
+	CUSTOMER_INFO.joinedRoom = CUSTOMER_INFO.name
+	room.fadeIn();
+});
+//收到邀请
+socket.on('invite',function(data){
+	CUSTOMER_INFO.joinedRoom = data;
+	room.fadeIn();
+	roomChat.append('<p id="watting-agree"><button class="btn btn-primary" type="button" id="jion">加入房间</button><button class="btn btn-primary" type="button" id="refuse">拒绝房间</button></p>');	
+});
+//同意加入房间
+roomChat.on('click','#jion',function(){
+	socket.emit("join",{room: CUSTOMER_INFO.joinedRoom,
 						name: CUSTOMER_INFO.name})
-})
-socket.on('roomMsg',(data)=>{
-	publicChatBox.innerHTML += '<p><strong>'+data.name+': </strong>'+ data.msg+'</p>';
-})
-socket.on('sys',function(data){
-	console.log(data);
-	socket.emit('chattingRoom',
-		{room : 'first',
-		 name: CUSTOMER_INFO.name,
-		 msg: 'hi'}
-	)
-})
+	room.fadeIn();
+	$("#watting-agree").remove();
+});
+//拒绝加入
+roomChat.on('click','#refuse',function(){
+	$("#watting-agree").remove();
+});
+//加入房间通知
+socket.on('sys',(data) => {
+	roomChat.append('<p><strong>'+data+'...</strong></p>');
+});
