@@ -1,0 +1,48 @@
+html, body{
+	height: 100%;
+}
+.login{
+	margin:5px 0;
+	margin-bottom: 20px;
+}
+.chat-header{
+	padding: 10px 5px;
+}
+.chat-box{
+	height: 600px;
+	overflow-y: scroll;
+	border-top: 0.98px solid rgb(204, 204, 204);
+}
+.close{
+	margin-top: 5px;
+}
+.private{
+	position: absolute;
+	display: none;
+	left: 50%;
+	top: 50%;
+	width: 500px;
+	height: 406px;
+	margin-left: -250px;
+	margin-top: -203px;
+	background: #fff;
+	z-index: 9;
+	box-shadow: 0 0 100px 1000px #000000a6;
+}
+.private .chat-box{
+	height: 300px;
+}
+.border{
+	border: 0.98px solid rgb(204, 204, 204);
+	border-radius: 5px;
+}
+.list-group li{
+	position: relative;
+    display: block;
+    padding: 10px 15px;
+    margin-bottom: -1px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}

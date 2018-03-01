@@ -2,57 +2,59 @@
 <html>
 <head>
 	<title>socket</title>
-	<style herf="bootstrap.css"></style>
-	<style type="text/css">
-		html, body{
-			height: 100%;
-		}
-		.list{
-			float: left;
-			width: 25%;	
-			height: 100%;		
-		}
-		.pubChat{
-			float: left;
-			width: 50%;
-			height: 100%;
-		}
-		.private{
-			position: absolute;
-			display: none;
-			left: -150px;
-			top: 30px;
-			width: 300px;
-			height: 500px;
-			margin-left: 50%;
-			background: #fff;
-		}
-		.border{
-			border: 1px solid #777;
-			padding: 10px;
-		}
-	</style>
+	<link rel="stylesheet" type="text/css" href="bootstrap.css"></link>
+	<link rel="stylesheet" type="text/css" href="index.css">
 </head>
-<body>
-	<div class="login" >
-		<input type="text" name="name" id='name'>
-		<input type="button" id="login" value="登录">
-	</div>
-	<div>
-		<ul class='list border' id="userList">11</ul>
-		<div class='pubChat border' id="pubChat">
-			<h1>public</h1>
-			<div class="chat-box" id="public-chat"></div>
-			<input type="text" name="message" id='message'>
-			<input type="button" id="send" value="发送">
+<body>	
+	<div class="container">
+		<!-- login  -->
+		<div class="input-group input-group-lg login">		  
+		  <input type="text" class="form-control" placeholder="Username" aria-describedby="sizing-addon1"  name="name" id='name'>
+		  <span class="input-group-btn">
+	        <button class="btn btn-primary" type="button" id="login" >登录</button>
+	      </span>
 		</div>
-	</div>
-	<div class='private border' id="private-chat-box">
-		<h4 id='private-title'>正在与</h4>
-		<div class="chat-box" id="private-chat"></div>
-		<input type="text" name="message" id='privatemessage'>
-		<input type="button" id="privatesend" value="发送">
-	</div>
+
+		<div class="row">
+		  <!-- userlist -->
+		  <div class="col-md-4">
+		  	<h4>在线人数：<span id="total-clients">0</span>人</h4>
+		  	<ul class='list-group' id="userList"></ul>
+		  </div>
+		  <!-- public chat block -->
+		  <div class="col-md-8">		  	
+			<div class="public-block border">			
+				<div id="pubChat">
+					<h5 class="chat-header">public</h5>			
+					<div class="chat-box" id="public-chat"></div>
+					<div class="input-group input-group-lg login">		  
+					  <input type="text" class="form-control" placeholder="Username" aria-describedby="sizing-addon1" name="message" id='message'>
+					  <span class="input-group-btn">
+				        <button class="btn btn-primary" type="button" id="send" >发送</button>
+				      </span>
+					</div>
+				</div>
+			</div>
+		  </div>		  
+		</div>
+		
+		<p class="text-center">Welcome to owlyme chatting room!</p>
+
+		<div class='private border' id="private-chat-box">
+			<div class="close">
+				<button type="button" class="btn" aria-label="Left Align"><span class="glyphicons glyphicons-remove-circle">X</span></button>
+			</div>	
+			<h5 class="chat-header" id='private-title'>正在...</h5>
+			<div class="chat-box" id="private-chat"></div>
+			<div class="input-group input-group-lg login">		  
+			  <input type="text" class="form-control" placeholder="Username" aria-describedby="sizing-addon1" name="message" id='privatemessage' />
+			  <span class="input-group-btn">
+		        <button class="btn btn-primary" type="button" id="privatesend">发送</button>
+		      </span>
+			</div>
+		</div>
+	</div>	
+	<!-- scripts -->
 	<script src="socket.io.js"></script>
 	<script src="jquery.min.js"></script>
 	<script src="chat.js"></script>

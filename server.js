@@ -11,6 +11,15 @@ app.use(express.static('public'))
 const io = socket(server)
 const users = {},
 	  list =[];
+
+const totalClients = ()=>{
+	io.clients((error, clients) => {
+      if (error) throw error;
+      console.log(clients.length)
+      io.sockets.emit('total', clients.length)
+    });
+}
+
 function ClientBeating( name ) {//心跳测试
 	var self = this;
 		this.name = name;
@@ -59,7 +68,9 @@ io.on('connection', (socket)=>{
 		//who send this msg
 		//who recieve this msg
 		//conents of msg
-		users[privateMsg.reciever].emit('privateMsg',privateMsg)
+		if(typeof users[privateMsg.reciever] === "object" ){
+			users[privateMsg.reciever].emit('privateMsg',privateMsg)
+		}		
 	})
 
 	//disconnect 
@@ -68,12 +79,11 @@ io.on('connection', (socket)=>{
 			delete users[client.name]
 			delete client
 		}
+		totalClients()
 	})
 
-	io.clients((error, clients) => {
-      if (error) throw error;
-      console.log('clients' ,clients.length); 
-    });
+	totalClients()
 
 })
+
 
