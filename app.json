@@ -1,0 +1,12 @@
+{
+  "apps": [{
+    "name": "socket",
+    "script": "server.js",
+    "node_args": "--harmony",
+    "autorestart": false,
+    "watch": true,
+    "exec_interpreter": "babel-node",
+    "exec_mode": "fork",
+    "log_date_format": "YYYY - MM - DD HH: mm Z"
+  }]
+}

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>test</title>
+</head>
+<body id=xy> 
+
+</body>
+<script>	
+	 var i = 0;
+	// while( i< 1000){
+	// 	i++
+	// 	xy.innerHTML +="<iframe src='http://localhost:4000/'></iframe>"
+	// }
+	var timer = setInterval(function (argument) {
+		i++
+		xy.innerHTML +="<iframe src='http://localhost:4000/'></iframe>"
+		if( i === 100){
+			alert('ok')
+			clearInterval( timer )
+		}
+	},10)
+</script>
+</html>

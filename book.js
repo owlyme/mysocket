@@ -8,5 +8,5 @@ router.get('/', (req, res)=>{
 router.get('/about', (req, res)=>{
 	res.send('About bookes')
 })
-
+console.log('XY')
 module.exports = router
