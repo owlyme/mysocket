@@ -1,22 +1,28 @@
 //客户端用户信息
 var CUSTOMER_INFO={
-	name: '',
+	name: '' || 'tourist 123',
 	id: '',
 	friends: [],
 	privateFriend: '',
+	privateFriendsList:[],
 	privateChatContent: {},
 	creatRoom: '',
 	joinedRoom: '',
-	invitedFriend: [],
+	invitedFriends: [],
 	totalClients: 0
 };
 
 //建立socket 连接
-var socket = io();
+var socket = io({
+	query: {
+		name: CUSTOMER_INFO.name
+	}
+});
+
 CUSTOMER_INFO.id = socket.id;
 //在线人数
 var totalClients = $('#total-clients');
-socket.on('total',function(data){
+socket.on('total', function(data){
 	totalClients.text(data)
 	CUSTOMER_INFO.totalClients = data
 })
@@ -99,7 +105,6 @@ var privateChatBox = $('#private-chat-box'),
 		getPrivateChatContent()
 		CUSTOMER_INFO.privateFriend = privateMsg.sender
 		privateChatBox.fadeIn()
-		changePrivateTitle()
 		setPrivateChatContent()
 		let str = '<p><strong>'+privateMsg.sender+':</strong>'+privateMsg.msg+'</p>';
 		$('#private-chat').append(str)
@@ -149,10 +154,8 @@ function getFriendName(event){
 	getPrivateChatContent()
 	CUSTOMER_INFO.privateFriend = event.target.innerText;
 	openPrivateBox()
-	changePrivateTitle()
 	setPrivateChatContent()
 }
-
 function openPrivateBox(){
 	if( CUSTOMER_INFO.privateFriend !== CUSTOMER_INFO.name ){
 		privateChatBox.fadeIn()
@@ -161,26 +164,26 @@ function openPrivateBox(){
 		}
 	}
 }
-function changePrivateTitle(){
-	privateTitle.text('与好友'+ CUSTOMER_INFO.privateFriend+ '聊天中...');	
-}
 function getPrivateChatContent(){
 	CUSTOMER_INFO.privateChatContent[CUSTOMER_INFO.privateFriend] = $('#private-chat').html();	
 	$('#private-chat').html('')
 }
 function setPrivateChatContent(){
+	privateTitle.text('与好友'+ CUSTOMER_INFO.privateFriend+ '聊天中...');
+	privateChat.html( CUSTOMER_INFO.privateChatContent[CUSTOMER_INFO.privateFriend] );
+}
+function renderPrivateChatList(){
 	$('#private-chat').html( CUSTOMER_INFO.privateChatContent[CUSTOMER_INFO.privateFriend] );
 }
-
           
 //创建加入房间-------------------------------------------------------------------
 function selectRoomFriend(event){
 	var name = event.target.value	
-	var index = CUSTOMER_INFO.invitedFriend.indexOf(name);
+	var index = CUSTOMER_INFO.invitedFriends.indexOf(name);
     if (index !== -1) {
-    	CUSTOMER_INFO.invitedFriend.splice(index, 1);
+    	CUSTOMER_INFO.invitedFriends.splice(index, 1);
     }else{
-    	CUSTOMER_INFO.invitedFriend.push(name)
+    	CUSTOMER_INFO.invitedFriends.push(name)
     }
 }
 var room = $('#room-chat-box'),
@@ -213,7 +216,7 @@ var room = $('#room-chat-box'),
 $('#invite').on('click',function(){
 	socket.emit("createRoom",{
 		room : CUSTOMER_INFO.name,
-		friends: CUSTOMER_INFO.invitedFriend,
+		friends: CUSTOMER_INFO.invitedFriends,
 		me: CUSTOMER_INFO.name
 	});
 	CUSTOMER_INFO.joinedRoom = CUSTOMER_INFO.name
@@ -223,10 +226,10 @@ $('#invite').on('click',function(){
 socket.on('invite',function(data){
 	CUSTOMER_INFO.joinedRoom = data;
 	room.fadeIn();
-	roomChat.append('<p id="watting-agree"><button class="btn btn-primary" type="button" id="jion">加入房间</button><button class="btn btn-primary" type="button" id="refuse">拒绝房间</button></p>');	
+	roomChat.append('<p id="watting-agree"><button class="btn btn-primary" type="button" id="join">加入房间</button><button class="btn btn-primary" type="button" id="refuse">拒绝房间</button></p>');	
 });
 //同意加入房间
-roomChat.on('click','#jion',function(){
+roomChat.on('click','#join',function(){
 	socket.emit("join",{room: CUSTOMER_INFO.joinedRoom,
 						name: CUSTOMER_INFO.name})
 	room.fadeIn();

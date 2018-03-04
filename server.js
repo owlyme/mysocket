@@ -1,7 +1,6 @@
 // import "babel-polyfill";
 import express from 'express'
-import socket from 'socket.io'
-import chatroom from './server/chatroom'
+import chatroom from './chat/index'
 
 const app = express()
 

@@ -16,7 +16,6 @@
 	        <button class="btn btn-primary" type="button" id="login" >登录</button>
 	      </span>
 		</div>
-
 		<div class="row">
 		  <!-- userlist -->
 		  <div class="col-md-4">
@@ -44,7 +43,11 @@
 		<p class="text-center">Welcome to owlyme chatting room!</p>
 	</div>
 	<!-- private -->
-	<div class='private border' id="private-chat-box">
+	<div class='row private border' id="private-chat-box">
+		<div class="col-sm-4">
+			<ul class='list-group' id="privateList"></ul>
+		</div>
+		<div class="col-sm-8">
 		<div class="close">
 			<button type="button" class="btn" aria-label="Left Align"><span class="glyphicons glyphicons-remove-circle">X</span></button>
 		</div>	
@@ -55,6 +58,7 @@
 		  <span class="input-group-btn">
 	        <button class="btn btn-primary" type="button" id="privatesend">发送</button>
 	      </span>
+		</div>
 		</div>
 	</div>
 
@@ -75,6 +79,6 @@
 	<!-- scripts -->
 	<script src="socket.io.js"></script>
 	<script src="jquery.min.js"></script>
-	<script src="chat.js"></script>
+	<script src="v2/index.js"></script>
 </body>
 </html>
