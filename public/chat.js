@@ -12,6 +12,7 @@ var CUSTOMER_INFO={
 	totalClients: 0
 };
 
+
 //建立socket 连接
 var socket = io({
 	query: {
@@ -54,6 +55,7 @@ var publicChatBox = $('#public-chat'),
 	sendPublic = $('#send'),
 	userList = $('#userList');
 
+
 	//发送公聊消息的方法
 	var publicChatting = function (){
 			socket.emit('msg', {
@@ -74,11 +76,14 @@ var publicChatBox = $('#public-chat'),
 	})
 	//所有人上线提醒
 	socket.on('someLogin',(name)=>{
+
 		publicChatBox.append('<p>'+name+'登录了</p>');
 		userList.append( '<li ><input type="checkbox" onclick="selectRoomFriend(event)" value="'
 								+name+'"><span ondblclick="getFriendName(event)">'+ name+ '</span></li>');
 		CUSTOMER_INFO.friends.unshift(name)
 	});	
+
+
 
 //私聊聊天-------------------------------------------------------------------
 var privateChatBox = $('#private-chat-box'),
@@ -93,6 +98,7 @@ var privateChatBox = $('#private-chat-box'),
 								sender: CUSTOMER_INFO.name,
 								reciever: CUSTOMER_INFO.privateFriend,
 								msg:privateMsg.val()})
+
 
 			$('#private-chat').append('<p><strong>'+CUSTOMER_INFO.name+':</strong>'+ privateMsg.val()+'</p>');
 			privateMsg.val('')
@@ -138,6 +144,7 @@ var privateChatBox = $('#private-chat-box'),
 	    });
 	})();
 
+
 //enter键事件
 function enterKeyEvent(ele,fn){
 	ele.on('keyup', (event)=>{
@@ -175,6 +182,7 @@ function setPrivateChatContent(){
 function renderPrivateChatList(){
 	$('#private-chat').html( CUSTOMER_INFO.privateChatContent[CUSTOMER_INFO.privateFriend] );
 }
+
           
 //创建加入房间-------------------------------------------------------------------
 function selectRoomFriend(event){
@@ -243,3 +251,4 @@ roomChat.on('click','#refuse',function(){
 socket.on('sys',(data) => {
 	roomChat.append('<p><strong>'+data+'...</strong></p>');
 });
+
