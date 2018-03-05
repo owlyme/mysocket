@@ -22,6 +22,7 @@ var ChatClient = (function () {
 			console.log(`Server send ${data}`);
 			this.fire('message',data)
 		}).on('msg', (data) => {
+			console.log('msg ',data)
 			this.fire('msg', data);  
 		});
 
@@ -53,7 +54,7 @@ var ChatClient = (function () {
 
 	Client.prototype.login = function(data) {
 		console.log(data)
-		this.socket.emit('login', data);
+		this.socket.emit('login', {name: data});
 	};
 	Client.prototype.close = function() {
 		this.socket.close();

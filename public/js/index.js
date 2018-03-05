@@ -34,10 +34,10 @@ var USER_INFO={
 			'msg': (data) => {
 				console.log(`msg: ${data}`);
 				if (data.type == 'login') {
-					//
-				} else if (data.type == 'txt') {
-					//
-				} else if  (data.type == 'invite') {
+					typeLogin( data.name )
+				} else if (data.type == 'publicChat') {
+					typePublicChat(data)
+				} else if (data.type == 'invite') {
 					//
 				} else if (data.type  == 'private'){
 					// 
@@ -60,21 +60,42 @@ var USER_INFO={
 	}
 	//登陆
 	$('#login').on('click',()=>{
-		client.login($('#name').val())
-		USER_INFO.name = $('#name').val()
+		USER_INFO.name =  $.trim( $('#name').val() );
+		client.login(USER_INFO.name)
 	});
 	$('#name').enterKey(function(){ 
-		client.login( $(this).val() );
-		USER_INFO.name = $(this).val();
+		USER_INFO.name =  $.trim( $(this).val() );
+		client.login( USER_INFO.name );
 	});
 
-	$('#send').on('click', (evt) => {
+	$('#send').on('click', (evt) => {		
 		let txt = $.trim($('#message').val());
+		$('#message').val('')
 		if (txt) {
 			client.send(txt);
+			$('#public-chat').append('<p><strong>'+USER_INFO.name+':</strong>'+ txt+'</p>');
+		}
+	});
+	$('#message').enterKey( (evt) => {
+		let txt = $.trim($(this).val());
+		$('#message').val('')
+		if (txt) {
+			client.send(txt);
+			$('#public-chat').append('<p><strong>'+USER_INFO.name+':</strong>'+ txt+'</p>');
 		}
 	});
 
+	function typeLogin(name){
+		$('#public-chat').append('<p>'+name+'登录了</p>');
+		$('#userList').append( '<li ><input type="checkbox" onclick="selectRoomFriend(event)" value="'
+								+name+'"><span ondblclick="getFriendName(event)">'+ name+ '</span></li>');
+		USER_INFO.friends.unshift(name)
+	};
+	function typePublicChat(data){
+		$('#public-chat').append('<p><strong>'+data.name+':</strong>'+ data.msg+'</p>');
+		$('#public-chat')[0].scrollTop = $('#public-chat')[0].scrollHeight;
+	}
+	
 })()
 
 

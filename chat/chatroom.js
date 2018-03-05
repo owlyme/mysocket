@@ -30,15 +30,20 @@ export default (args)=>{
 		socket.send(userlist);//fire when conneted ,client on message 
 	
 		//login remind
-		socket.on('login',(name)=>{
-			io.sockets.emit('someLogin', name)
-			user.id || (user.login = true )
+		socket.on('login',(data)=>{	
+			console.log(`login user's ${data.name}`)		
+			if(!user.login){
+				user.login = true;
+				user.name = data.name;
+				io.sockets.emit('msg', {name: data.name, type: "login"})
+			}
 		})
 
 		//get public msg and broadcast
-		socket.on('send',(msg)=>{
-			socket.broadcast.emit('msg', msg);			
-			user.clientBeat.datain();
+		socket.on('send',(data)=>{
+			console.log(`send message ${data.msg}`)
+			socket.broadcast.emit('msg',  {msg: data.msg, name:user.name, type: "publicChat"});
+			// user.clientBeat.datain();
 		})
 		
 		//private chat
