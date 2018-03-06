@@ -1,12 +1,10 @@
-
-// UI level
 //客户端用户信息
 var USER_INFO={
 	name: 'client_' + Date.now(),
 	id: null,
 	friends: [],
-	privateFriend: '',
-	privateFriendsList:[],
+	reciever: '',
+	friendNamesList:[],
 	privateChatContent: {},
 	creatRoom: '',
 	joinedRoom: '',
@@ -14,7 +12,9 @@ var USER_INFO={
 	totalClients: 0,
 	userList: []
 };
-
+$(document).ready(function(){
+//start-----------------------------
+// UI level
 (function () {
 	const client = new ChatClient({
 		userInfo: {
@@ -27,6 +27,7 @@ var USER_INFO={
 			},
 			'message':(userList)=>{
 				USER_INFO.userList	= userList;
+				renderUserList()
 			},
 			'disconnect': (data) => {
 				console.log('disconnected!');
@@ -34,16 +35,15 @@ var USER_INFO={
 			'msg': (data) => {
 				console.log(`msg: ${data}`);
 				if (data.type == 'login') {
-					typeLogin( data.name )
-				} else if (data.type == 'publicChat') {
-					typePublicChat(data)
+					typeLogin(data)
+				} else if (data.type == 'public') {
+					typePublic(data)
 				} else if (data.type == 'invite') {
 					//
 				} else if (data.type  == 'private'){
-					// 
+					typePrivate(data)
 				}
-			},
-			
+			},			
 		}
 	});
 
@@ -59,44 +59,133 @@ var USER_INFO={
 		})
 	}
 	//登陆
-	$('#login').on('click',()=>{
+	function sendLogin(){
 		USER_INFO.name =  $.trim( $('#name').val() );
-		client.login(USER_INFO.name)
-	});
-	$('#name').enterKey(function(){ 
-		USER_INFO.name =  $.trim( $(this).val() );
-		client.login( USER_INFO.name );
-	});
-
-	$('#send').on('click', (evt) => {		
+		if( USER_INFO.name ){
+			var data ={
+				txt: USER_INFO.name,
+				type: 'login'
+			};
+			client.send(data,(data)=>{USER_INFO.userList.push(data.id)})
+		}else{
+			console.log('user name is undefined')
+		}
+	}
+	$('#login').on('click',sendLogin);
+	$('#name').enterKey(sendLogin);
+	//公共聊天室
+	function sendPublic(){
 		let txt = $.trim($('#message').val());
 		$('#message').val('')
 		if (txt) {
-			client.send(txt);
+			var data ={
+				txt: txt,
+				type: 'public'
+			};
+			client.send(data);
 			$('#public-chat').append('<p><strong>'+USER_INFO.name+':</strong>'+ txt+'</p>');
 		}
-	});
-	$('#message').enterKey( (evt) => {
-		let txt = $.trim($(this).val());
-		$('#message').val('')
-		if (txt) {
-			client.send(txt);
-			$('#public-chat').append('<p><strong>'+USER_INFO.name+':</strong>'+ txt+'</p>');
-		}
-	});
-
-	function typeLogin(name){
-		$('#public-chat').append('<p>'+name+'登录了</p>');
-		$('#userList').append( '<li ><input type="checkbox" onclick="selectRoomFriend(event)" value="'
-								+name+'"><span ondblclick="getFriendName(event)">'+ name+ '</span></li>');
-		USER_INFO.friends.unshift(name)
-	};
-	function typePublicChat(data){
-		$('#public-chat').append('<p><strong>'+data.name+':</strong>'+ data.msg+'</p>');
-		$('#public-chat')[0].scrollTop = $('#public-chat')[0].scrollHeight;
 	}
-	
+	$('#send').on('click', sendPublic);
+	$('#message').enterKey( sendPublic );
+
+	//私聊
+	var privateChatBox = $('#private-chat-box'),
+		closePrivateChatBox = $('#private-chat-box .close'),
+		privateChat = $('#private-chat'),
+		privateMsg = $('#privatemessage'),
+		privateBtn = $('#privatesend'),
+		privateTitle = $('#private-title');
+
+	function sendPrivate(){
+		let txt = $.trim(privateMsg.val());
+		privateMsg.val('');
+		if (txt) {
+			var data ={
+				txt: txt,
+				reciever: USER_INFO.friendName,
+				recieverId: USER_INFO.friendId,
+				type: 'private'
+			};
+			client.send(data);
+			privateChat.append('<p><strong>'+USER_INFO.name+':</strong>'+ txt+'</p>');
+		};
+	};
+
+	privateBtn.on('click', sendPrivate);
+	privateMsg.enterKey( sendPrivate );
+
+
+	$('#userList').on('dblclick','.user',getFriendName);
+	// $('#userList').on('click','.checkbox',selectRoomFriend);
+	closePrivateChatBox.on('click',function(){
+		privateChatBox.fadeOut().removeAttr('style')
+	});
+	function getFriendName(event){
+		getPrivateChatContent()
+		USER_INFO.friendName = event.target.innerText;
+		USER_INFO.friendId = $(event.target).attr('id');
+		openPrivateBox()
+		setPrivateChatContent()
+	}
+	function openPrivateBox(){
+		if( USER_INFO.friendId !== USER_INFO.name ){
+			privateChatBox.fadeIn()
+			if( USER_INFO.friendId in USER_INFO.privateChatContent ){
+				$('#private-chat').html = USER_INFO.privateChatContent[USER_INFO.friendId]
+			}
+		}
+	}
+	function getPrivateChatContent(){
+		USER_INFO.privateChatContent[USER_INFO.friendId] = $('#private-chat').html();	
+		$('#private-chat').html('')
+	}
+	function setPrivateChatContent(){
+		privateTitle.text('与好友'+ USER_INFO.friendName+ '聊天中...');
+		privateChat.html( USER_INFO.privateChatContent[USER_INFO.friendId] );
+	}
+	function renderPrivateChatList(){
+		$('#private-chat').html( USER_INFO.privateChatContent[USER_INFO.friendId] );
+	}
+	//render msg
+	function renderUserList(userList){
+		USER_INFO.userList.forEach((item, index)=>{
+			$('#userList').append( '<li ><input type="checkbox" class="checkbox" value="'
+						+item.name+'"><span class="user" id='+item.id+'>'+ item.name+ '</span></li>');
+		})
+	}
+	function typeLogin(data){
+		var name = data.txt,
+			id = data.id;
+		$('#public-chat').append('<p>'+name+'登录了</p>');
+
+		USER_INFO.friends.unshift(name);
+		$('#userList').empty();
+		USER_INFO.userList.forEach((item, index)=>{
+			if(item.id === id){
+				item.name = name;
+			}else{
+				USER_INFO.userList.unshift(data);
+				break;
+			}
+		});
+		renderUserList();
+	};
+	function typePublic(data){
+		$('#public-chat').append('<p><strong>'+data.name+':</strong>'+ data.txt +'</p>');
+		$('#public-chat')[0].scrollTop = $('#public-chat')[0].scrollHeight;
+	};
+	function typePrivate(data){
+		getPrivateChatContent()
+		USER_INFO.friendId = data.id;
+		privateChatBox.fadeIn()
+		setPrivateChatContent()
+		let str = '<p><strong>'+data.name+':</strong>'+data.txt+'</p>';
+		$('#private-chat').append(str)
+	};
 })()
+//end-----------------------------
+});
 
 
 // socket.on('connect', (list) => {
@@ -172,7 +261,7 @@ var USER_INFO={
 // 	var privateChatting = function(){
 // 			socket.emit('privateMsg',{
 // 								sender: USER_INFO.name,
-// 								reciever: USER_INFO.privateFriend,
+// 								reciever: USER_INFO.friendId,
 // 								msg:privateMsg.val()})
 
 // 			$('#private-chat').append('<p><strong>'+USER_INFO.name+':</strong>'+ privateMsg.val()+'</p>');
@@ -184,7 +273,7 @@ var USER_INFO={
 // 	//收到私聊消息
 // 	socket.on('privateMsg',(privateMsg)=>{
 // 		getPrivateChatContent()
-// 		USER_INFO.privateFriend = privateMsg.sender
+// 		USER_INFO.friendId = privateMsg.sender
 // 		privateChatBox.fadeIn()
 // 		setPrivateChatContent()
 // 		let str = '<p><strong>'+privateMsg.sender+':</strong>'+privateMsg.msg+'</p>';
@@ -219,43 +308,6 @@ var USER_INFO={
 // 	    });
 // 	})();
 
-//enter键事件
-function enterKeyEvent(ele,fn){
-	ele.on('keyup', (event)=>{
-		if(event.keyCode === 13 ){
-			try{
-				fn()
-			}catch(e){
-				console.log('方法不真确',e)
-			}
-		}
-	})
-}
-// function getFriendName(event){
-// 	getPrivateChatContent()
-// 	USER_INFO.privateFriend = event.target.innerText;
-// 	openPrivateBox()
-// 	setPrivateChatContent()
-// }
-// function openPrivateBox(){
-// 	if( USER_INFO.privateFriend !== USER_INFO.name ){
-// 		privateChatBox.fadeIn()
-// 		if( USER_INFO.privateFriend in USER_INFO.privateChatContent ){
-// 			$('#private-chat').html = USER_INFO.privateChatContent[USER_INFO.privateFriend]
-// 		}
-// 	}
-// }
-// function getPrivateChatContent(){
-// 	USER_INFO.privateChatContent[USER_INFO.privateFriend] = $('#private-chat').html();	
-// 	$('#private-chat').html('')
-// }
-// function setPrivateChatContent(){
-// 	privateTitle.text('与好友'+ USER_INFO.privateFriend+ '聊天中...');
-// 	privateChat.html( USER_INFO.privateChatContent[USER_INFO.privateFriend] );
-// }
-// function renderPrivateChatList(){
-// 	$('#private-chat').html( USER_INFO.privateChatContent[USER_INFO.privateFriend] );
-// }
           
 // //创建加入房间-------------------------------------------------------------------
 // function selectRoomFriend(event){

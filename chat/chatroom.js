@@ -25,67 +25,60 @@ export default (args)=>{
 			login: false,
 			clientBeat: new ClientBeating( socket )
 		};
+
 		users[user.id] = user;
-		userlist.push(query.userName);
+		userlist.unshift({name:query.userName, id:user.id});
 		socket.send(userlist);//fire when conneted ,client on message 
-	
-		//login remind
-		socket.on('login',(data)=>{	
-			console.log(`login user's ${data.name}`)		
-			if(!user.login){
-				user.login = true;
-				user.name = data.name;
-				io.sockets.emit('msg', {name: data.name, type: "login"})
-			}
-		})
 
 		//get public msg and broadcast
-		socket.on('send',(data)=>{
-			console.log(`send message ${data.msg}`)
-			socket.broadcast.emit('msg',  {msg: data.msg, name:user.name, type: "publicChat"});
-			// user.clientBeat.datain();
-		})
-		
-		//private chat
-		socket.on('privateMsg', (privateMsg)=>{
-			//who send this msg
-			//who recieve this msg
-			//conents of msg
-			if(typeof users[privateMsg.reciever] === "object" ){
-				users[privateMsg.reciever].emit('privateMsg',privateMsg)
-			}
-		})
+		socket.on('send',(data, callback)=>{
+			data.name = user.name;
+			if (data.type == 'login') {//login remind
+				console.log(`login user's ${data.txt}`)		
+				if(!user.login){
+					user.login = true;
+					user.name = data.txt;
+					data.id = user.id;
+					io.sockets.emit('msg', data);
+				};
 
-		//create chatting room
-		socket.on('createRoom', (creatRoom)=>{
-			if(!rooms[creatRoom.room]){
-				rooms[creatRoom.room]= creatRoom.room
-			}
-			socket.join(creatRoom.room)
-			//inviting friends
-			creatRoom.friends.forEach((item, index)=>{
-				if(typeof users[item] === "object"){
-					users[item].emit('invite', creatRoom.room)
-				}
-			})
-		})
-		//join room
-		socket.on('join',(joinRoom)=>{
-			socket.join(joinRoom.room)
-			io.to(joinRoom.room).emit('sys', joinRoom.name + '加入了房间');
-		})
-		//chatting in room
-		socket.on('chattingRoom',(msg)=>{
-			console.log(msg)
-			socket.broadcast.to(msg.room).emit('roomMsg', msg);
-		})
+			} else if (data.type == 'public') {
+				console.log(`send message ${data.msg}`)
+				socket.broadcast.emit('msg', data);
+
+			} else if (data.type  == 'private'){
+				data.id = user.id
+				console.log('private msg ', data)
+				try{
+					users[data.recieverId].socket.emit('msg', data)
+				}catch(err){
+					console.log('用户不存在/已经下线')
+					data.txt = '用户不存在/已经下线';
+					data.name = ''
+					socket.emit('msg', data)
+				};
+			};
+
+			try{
+				callback( data )
+			}catch(err){
+				console.log(err)
+			};
+		});
+
 		//disconnect 
 		socket.on('disconnect',()=>{
-			// if (typeof client === "object"){
-			// 	delete users[client.name];
-			// 	// delete client;
-			// }
-			// delete users[client.name];
+			if (users[user.id]){
+				console.log('delete a user')
+				delete users[user.id];
+			};
+			userlist.forEach((item, index)=>{
+				if(item.id == socket.id){
+					delete userlist[index];
+					userlist.splice(index,1);
+					return;
+				};
+			});
 			totalClients()
 		})
 		totalClients()

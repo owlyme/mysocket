@@ -1,5 +1,8 @@
 // model/logic leve
 var ChatClient = (function () {
+	const evtTypes = ['msg','connect','disconnect','message'],
+		  sendTypes = ['login','public','invite','private'];
+
 	function Client(options) {
 		this._callbacks = {};
 		if (options.events) {
@@ -31,9 +34,12 @@ var ChatClient = (function () {
 	
 	Client.prototype.on = function(evtType, callback) {
 		// maybe check evtType : msg/connect/disconnect
-		if (! (evtType == 'msg' || evtType == 'connect' || evtType == 'disconnect' || evtType == 'message')) {
-			throw new Error('invalid event type: ' + evtType);
-		};
+		// if (! (evtType == 'msg' || evtType == 'connect' || evtType == 'disconnect' || evtType == 'message')) {
+		// 	throw new Error('invalid event type: ' + evtType);
+		// };
+		if( evtTypes.indexOf(evtType) == -1){ 
+			throw new Error('invalid event type: ' + evtType); 
+		}
 		if (this._callbacks[evtType] == undefined) {
 			this._callbacks[evtType] = [];
 		};
@@ -50,18 +56,19 @@ var ChatClient = (function () {
 			}
 		}
 	};
-
-
-	Client.prototype.login = function(data) {
-		console.log(data)
-		this.socket.emit('login', {name: data});
+	Client.prototype.login = function(data,callback) {
+		console.log(`login name is ${data}`)
+		this.socket.emit('login', {name: data,} ,callback);
 	};
 	Client.prototype.close = function() {
 		this.socket.close();
 	};
-	Client.prototype.send = function(txt) {
-		console.info(`sending: ${txt}`);
-		this.socket.emit('send', {msg: txt});
+	Client.prototype.send = function(data,callback) {
+		console.info(`sending: ${data.txt}`);
+		if( sendTypes.indexOf(data.type) == -1){ 
+			throw new Error('invalid send type: ' + data.type); 
+		}
+		this.socket.emit('send', data, callback);
 	};
 
 	return Client;
