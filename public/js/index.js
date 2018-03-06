@@ -149,6 +149,7 @@ $(document).ready(function(){
 	}
 	//render msg
 	function renderUserList(userList){
+		$('#userList').empty();
 		USER_INFO.userList.forEach((item, index)=>{
 			$('#userList').append( '<li ><input type="checkbox" class="checkbox" value="'
 						+item.name+'"><span class="user" id='+item.id+'>'+ item.name+ '</span></li>');
@@ -158,15 +159,12 @@ $(document).ready(function(){
 		var name = data.txt,
 			id = data.id;
 		$('#public-chat').append('<p>'+name+'登录了</p>');
-
-		USER_INFO.friends.unshift(name);
-		$('#userList').empty();
+		USER_INFO.friends.unshift(name);		
 		USER_INFO.userList.forEach((item, index)=>{
 			if(item.id === id){
 				item.name = name;
 			}else{
 				USER_INFO.userList.unshift(data);
-				break;
 			}
 		});
 		renderUserList();

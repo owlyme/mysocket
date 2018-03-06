@@ -56,10 +56,7 @@ var ChatClient = (function () {
 			}
 		}
 	};
-	Client.prototype.login = function(data,callback) {
-		console.log(`login name is ${data}`)
-		this.socket.emit('login', {name: data,} ,callback);
-	};
+
 	Client.prototype.close = function() {
 		this.socket.close();
 	};
