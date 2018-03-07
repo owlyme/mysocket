@@ -7,6 +7,7 @@ html, body{
 }
 .chat-header{
 	padding: 10px 5px;
+	white-space:nowrap;
 }
 .chat-box{
 	height: 450px;
@@ -22,13 +23,14 @@ html, body{
 	display: none;
 	left: 50%;
 	top: 50%;
-	width: 500px;
+	width: 600px;
 	height: 406px;
 	margin-left: -250px;
 	margin-top: -203px;
 	background: #fff;
 	z-index: 9;
 	box-shadow: 0 0 100px 1000px #000000a6;
+	word-break: 
 }
 .private .chat-box,
 .room .chat-box{

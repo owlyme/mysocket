@@ -16,7 +16,7 @@ export default (args)=>{
 	io.engine.generateId = (req) => {
 	  return "custom:id:" + userId++; // custom id must be unique
 	}
-	io.of(nsp).on('connection', (socket)=>{		
+	io.of(nsp).on('connection', (socket)=>{
 		const query = socket.handshake.query;
 		let user = {
 			id: socket.id,
@@ -28,18 +28,24 @@ export default (args)=>{
 
 		users[user.id] = user;
 		userlist.unshift({name:query.userName, id:user.id});
-		socket.send(userlist);//fire when conneted ,client on message 
 
+		//fire when conneted ,client on message
+		socket.send({list:userlist, clients:io.engine.clientsCount});
+		//vistor on line
+		socket.broadcast.emit('msg', {id: user.id,txt: user.name, type:'login'});
 		//get public msg and broadcast
 		socket.on('send',(data, callback)=>{
 			data.name = user.name;
 			if (data.type == 'login') {//login remind
-				console.log(`login user's ${data.txt}`)		
+				console.log(`login user's ${data.txt}`)
 				if(!user.login){
 					user.login = true;
 					user.name = data.txt;
 					data.id = user.id;
 					io.sockets.emit('msg', data);
+
+					let index = searchUserIndex(user.id);
+					userlist[index].name =  user.name;
 				};
 
 			} else if (data.type == 'public') {
@@ -60,7 +66,7 @@ export default (args)=>{
 			};
 
 			try{
-				callback( data )
+				callback(true)
 			}catch(err){
 				console.log(err)
 			};
@@ -68,29 +74,17 @@ export default (args)=>{
 
 		//disconnect 
 		socket.on('disconnect',()=>{
+			user.login = false;
+			io.sockets.emit('msg', {id: user.id,txt: user.name, type:'off'});
 			if (users[user.id]){
-				console.log('delete a user')
+				// console.log('delete a user')
 				delete users[user.id];
 			};
-			userlist.forEach((item, index)=>{
-				if(item.id == socket.id){
-					delete userlist[index];
-					userlist.splice(index,1);
-					return;
-				};
-			});
-			totalClients()
+			let index = searchUserIndex(user.id);				
+			delete userlist[index];
+			userlist.splice(index,1);
 		})
-		totalClients()
 	})
-
-	const totalClients = ()=>{
-		io.clients((error, clients) => {
-	      if (error) throw error;
-	      console.log(clients.length);
-	      io.sockets.emit('total', clients.length);
-	    });
-	}
 
 	function ClientBeating(socket) {//心跳测试
 		var self = this;
@@ -109,5 +103,15 @@ export default (args)=>{
 		this.timeout = setTimeout(this.timeoutProc, timeout);
 	}
 
+	function searchUserIndex(id){
+		let _index = -1;
+		userlist.forEach((item, index)=>{
+			if(item.id === id){
+				_index = index;
+				return ;
+			}
+		});
+		return _index
+	}
 
 }

@@ -8,8 +8,7 @@ var ChatClient = (function () {
 		if (options.events) {
 			for (let evtType in options.events)
 				this.on(evtType, options.events[evtType]);
-		}
-
+		};
 		this.socket = io(options.url || '/', {
 			query: {
 				userId: options.userInfo.id,
@@ -28,15 +27,11 @@ var ChatClient = (function () {
 			console.log('msg ',data)
 			this.fire('msg', data);  
 		});
-
 	}
 
 	
 	Client.prototype.on = function(evtType, callback) {
 		// maybe check evtType : msg/connect/disconnect
-		// if (! (evtType == 'msg' || evtType == 'connect' || evtType == 'disconnect' || evtType == 'message')) {
-		// 	throw new Error('invalid event type: ' + evtType);
-		// };
 		if( evtTypes.indexOf(evtType) == -1){ 
 			throw new Error('invalid event type: ' + evtType); 
 		}
